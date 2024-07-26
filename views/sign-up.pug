@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  h1= title
+  form(action="/sign-up", method="post") 
+    div(class="row g-3 mb-3")
+      div(class="col")
+        input(type="text" class="form-control" name="firstName" placeholder="First name" aria-label="First name" required value=user? user.firstName : '')
+      div(class="col")
+        input(type="text" class="form-control" name="lastName" placeholder="Last name" aria-label="Last name" required value=user? user.lastName : '')
+
+    div(class="form-floating mb-3")
+      input(type="text", class="form-control", id="username", name="username" required value=user? user.username : '')
+      label(for="username") Username
+
+    div(class="form-floating mb-3")
+      input(type="password", class="form-control", id="password", name="password" required)
+      label(for="password") Password
+
+    div(class="form-floating mb-3")
+      input(type="password", class="form-control", id="password2", name="password2" required)
+      label(for="password2") Confirm Password
+    
+    button(type="submit" class="btn btn-primary") Register
+  
+  if errors
+    ul(class="text-danger m-2")
+      for error in errors 
+        li!= error.msg
