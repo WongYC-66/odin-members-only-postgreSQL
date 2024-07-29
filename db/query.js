@@ -71,6 +71,7 @@ exports.saveNewMessage = async (message) => {
 }
 
 exports.findByMessageIdAndDelete = async (message_id) => {
+    // console.log(message_id)
     await pool.query(`
         DELETE from messages
         WHERE message_id = ${message_id}
