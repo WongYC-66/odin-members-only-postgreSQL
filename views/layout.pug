@@ -14,17 +14,17 @@ html
         ul(class="nav justify-content-end")
           if user
             div(class="d-flex align-items-center justify-content-center") 
-              div Welcome Back, #{user.firstName} #{user.lastName} (#{user.username})
+              div Welcome Back, #{user.firstname} #{user.lastname} (#{user.username})
               div(class="d-flex flex-column justify-content-center align-items-center mx-3")
-                if user.isMember
+                if user.ismember
                   span(class="fs-6 fw-bold text-warning") Member
-                if user.isAdmin
+                if user.isadmin
                   span(class="fs-6 fw-bolder text-warning") Admin
 
-            if !user.isMember
+            if !user.ismember
               li(class="nav-item")
                 a(class="nav-link" href="/join-the-club") Join Club
-            if !user.isAdmin
+            if !user.isadmin
               li(class="nav-item")
                 a(class="nav-link" href="/upgrade-to-admin") Upgrade to Admin
             li(class="nav-item")

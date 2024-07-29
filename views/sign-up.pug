@@ -5,12 +5,12 @@ block content
   form(action="/sign-up", method="post") 
     div(class="row g-3 mb-3")
       div(class="col")
-        input(type="text" class="form-control" name="firstName" placeholder="First name" aria-label="First name" required value=user? user.firstName : '')
+        input(type="text" class="form-control" name="firstName" placeholder="First name" aria-label="First name" required value=userForm? userForm.firstName : '')
       div(class="col")
-        input(type="text" class="form-control" name="lastName" placeholder="Last name" aria-label="Last name" required value=user? user.lastName : '')
+        input(type="text" class="form-control" name="lastName" placeholder="Last name" aria-label="Last name" required value=userForm? userForm.lastName : '')
 
     div(class="form-floating mb-3")
-      input(type="text", class="form-control", id="username", name="username" required value=user? user.username : '')
+      input(type="text", class="form-control", id="username", name="username" required value=userForm? userForm.username : '')
       label(for="username") Username
 
     div(class="form-floating mb-3")

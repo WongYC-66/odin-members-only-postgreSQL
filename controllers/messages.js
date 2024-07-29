@@ -1,8 +1,9 @@
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
-const User = require('../model/user')
 const Message = require('../model/message')
+
+const db = require('../db/query.js')
 
 // Handles new message Post Request
 exports.message_post = [
@@ -14,14 +15,15 @@ exports.message_post = [
   asyncHandler(async (req, res, next) => {
     if (!req.isAuthenticated())
       res.redirect("/")
-    const message = new Message({
+    const message = {
       title: req.body.title,
       message: req.body.message,
-      user: req.user,
-      timestamp: new Date(),
-    })
+      user_id: req.user.user_id,
+      timestamp: new Date().toJSON(),
+    }
+    // console.log({message})
 
-    await message.save()
+    await db.saveNewMessage(message)
     res.redirect('/')
   })
 ];
@@ -29,8 +31,8 @@ exports.message_post = [
 // handle admin delete post 
 exports.message_delete_post = asyncHandler(async (req, res, next) => {
   if (req.isAuthenticated() && req.user.isAdmin) {
-    let postId = req.body.msgId
-    await Message.findByIdAndDelete(postId)
+    let message_id = req.body.msgId
+    await db.findByMessageIdAndDelete(message_id)
     res.redirect("/");
   } else {
     res.redirect("/");

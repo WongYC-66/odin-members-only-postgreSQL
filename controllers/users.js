@@ -2,8 +2,9 @@ const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require('bcrypt')
 
-const User = require('../model/user')
 const passport = require('passport')
+
+const db = require('../db/query.js')
 
 // Handles User Sign Up Get Request
 exports.sign_in_get = asyncHandler(async (req, res, next) => {
@@ -34,9 +35,9 @@ exports.sign_up_post = [
   body("username")
     .custom(async (value, { req }) => {
       // if username been used by someone 
-      let userExisted = await User.findOne({ username: value })
-        .collation({ locale: "en", strength: 2 })
-        .exec()
+
+      let userExisted = await db.getUserByUsername(value)
+
       if (userExisted) {
         throw new Error('username already in use');
       }
@@ -50,19 +51,19 @@ exports.sign_up_post = [
     // Extract the validation errors from a request.
     const errors = validationResult(req);
 
-    let user = new User({
+    let user = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       username: req.body.username,
       password: req.body.password,
       isMember: false
-    })
+    }
 
     // There are errors. Render form again with sanitized values/error messages.
     if (!errors.isEmpty()) {
       res.render('sign-up', {
         title: 'Sign Up',
-        user,
+        userForm : user,
         errors: errors.array()
       });
     } else {
@@ -73,7 +74,7 @@ exports.sign_up_post = [
         // otherwise, store hashedPassword in DB
         try {
           user.password = hashedPassword
-          await user.save();
+          await db.saveNewUser(user);
           res.redirect("/");
         } catch (err) {
           return next(err);
@@ -120,12 +121,13 @@ exports.join_club_post = [
     if (!errors.isEmpty()) {
       res.render('join-club', {
         title: 'Join Club / Member',
-        user : req.user,
+        user: req.user,
         errors: errors.array()
       });
     } else {
       // no error, then update isMember status to DB
-      await User.findByIdAndUpdate(req.user._id, {isMember : true})
+      await db.findByUserIdAndUpdate(req.user.user_id, { isMember: true })
+      req.user.ismember = true
       res.redirect('/')
     }
   })
@@ -157,12 +159,13 @@ exports.join_club_admin_post = [
     if (!errors.isEmpty()) {
       res.render('join-club-admin', {
         title: 'Upgrade to Admin',
-        user : req.user,
+        user: req.user,
         errors: errors.array()
       });
     } else {
-      // no error, then update isMember status to DB
-      await User.findByIdAndUpdate(req.user._id, {isAdmin : true})
+      // no error, then update isAdmin status to DB
+      await db.findByUserIdAndUpdate(req.user.user_id, { isAdmin: true })
+      req.user.isadmin = true
       res.redirect('/')
     }
   })

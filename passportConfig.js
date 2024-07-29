@@ -1,9 +1,9 @@
 const passport = require("passport");
-const session = require("express-session");
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require('bcrypt')
+// 
+const pgPool = require('./db/pool.js');
 
-const User = require("./model/user")
 
 const customFields = {
     usernameField: 'username',
@@ -12,7 +12,9 @@ const customFields = {
 
 const verifyCallback = async (username, password, done) => {
     try {
-        const user = await User.findOne({ username: username });
+        const { rows } = await pgPool.query(`SELECT * FROM users WHERE username = '${username}'`)
+        const user = rows[0]
+
         if (!user) {
             console.log("incorrect username")
             return done(null, false, { message: "Incorrect username" });
@@ -36,12 +38,13 @@ passport.use(strategy)
 
 
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+    done(null, user.user_id);
 });
 // Function three : serialization
-passport.deserializeUser(async (id, done) => {
+passport.deserializeUser(async (user_id, done) => {
     try {
-        const user = await User.findById(id);
+        const { rows } = await pgPool.query(`SELECT * FROM users WHERE user_id = '${user_id}'`)
+        const user = rows[0]
         done(null, user);
     } catch (err) {
         done(err);

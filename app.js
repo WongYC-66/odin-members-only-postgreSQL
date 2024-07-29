@@ -3,28 +3,23 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const session = require('express-session')
-const MongoStore = require('connect-mongo');
+
+// postgreSQL + express session
+const expressSession = require('express-session');
 const passport = require('passport')
+// postgreSQL + express session
 
-
-if(process.env.NODE_ENV != 'production')
+if (process.env.NODE_ENV != 'production')
   require('dotenv').config()  // import .env environment variable file
+
+// postgreSQL + express session
+const pgPool = require('./db/pool.js');
+const pgSession = require('connect-pg-simple')(expressSession);
+// postgreSQL + express session
 
 var indexRouter = require('./routes/index');
 
 var app = express();
-
-// Set up mongoose connection
-const mongoose = require("mongoose");
-mongoose.set("strictQuery", false);
-const mongoDB = process.env.MONGODB_URL;
-
-main().catch((err) => console.log(err));
-async function main() {
-  await mongoose.connect(mongoDB);
-}
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -36,24 +31,26 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-// sesssion set up
-const sessionStore = MongoStore.create({ mongoUrl: process.env.MONGODB_URL})
-
-app.use(session({ 
-  secret: process.env.SECRET, 
-  resave: false, 
+// postgreSQL + express session
+app.use(expressSession({
+  store: new pgSession({
+    pool: pgPool,                // Connection pool
+    tableName: 'session'   // Use another table-name than the default "session" one
+    // Insert connect-pg-simple options here
+  }),
+  secret: process.env.SECRET,
   saveUninitialized: true,
-  store: sessionStore,
-  cookie: {
-    maxAge: 1000 * 24 * 60 * 60 // 1 day .
-  }
+  resave: false,
+  cookie: { maxAge: 1 * 24 * 60 * 60 * 1000 } // 1 day
+  // cookie: { maxAge: 1 * 1 * 1 * 60 * 1000 } // 1 min
+  // Insert express-session options here
 }));
 
 // passpoth configuration set up
-require('./passportConfig')
-app.use(passport.initialize())
 app.use(passport.session())
+require('./passportConfig')
+// app.use(passport.initialize())
+// postgreSQL + express session
 
 app.use('/', indexRouter);
 

@@ -4,11 +4,11 @@ block content
   div(class='container fluid mx-auto')
     div(class='ms-5 fst-italic')
       h5(class="text-info") Non-members can view all message 
-      h5(class="text-success")  Members can view all messages with author & timestamp 
+      h5(class="text-success")  Join to be a member, can post and view all messages with author & timestamp 
       h5(class="text-danger")  Admins can view & delete any message
   
     //- Post new Message box
-    if user && (user.isMember || user.isAdmin)
+    if user && (user.ismember || user.isadmin)
       form(class='ms-5' action='./message-post' method='POST')
         div(class="row")
           div(class="col")
@@ -26,14 +26,14 @@ block content
         for msg in messages 
           div(class="card text-bg-light mb-3 d-flex flex-row")
             div(class="card-header") 
-              if user && (user.isMember || user.isAdmin)
-                span(class="fw-bold") #{msg.user.username}, 
-                | #{msg.datetime}
+              if user && (user.ismember || user.isadmin)
+                span(class="fw-bold") #{msg.username}, 
+                | #{new Date(msg.timestamp).toLocaleString('en-GB', { timeZone: 'UTC' }) }
               div(class="card-body")
                 h5(class="card-title") #{msg.title}
                 p(class="card-text") #{msg.message}
-            if user && user.isAdmin
+            if user && user.isadmin
               form(action='./message-delete-post' method='POST' class="bg-danger bg-gradient")
-                input(name="msgId" hidden value=msg._id)
+                input(name="msgId" hidden value=msg.message_id)
                 button(type="submit" class="btn btn-danger")
                   i(class="bi bi-trash")

@@ -1,20 +1,16 @@
 var express = require('express');
 var router = express.Router();
 
-const { body, validationResult } = require("express-validator");
-const asyncHandler = require("express-async-handler");
-
+const db = require('../db/query.js')
 const users = require('../controllers/users.js')
 const messages = require('../controllers/messages.js')
 
-const Message = require('../model/message')
+// const Message = require('../model/message')
 
 /* GET home page. */
 router.get('/', async function (req, res, next) {
-  let allMessages = await Message.find()
-    .populate('user', 'username')
-    .sort({ timestamp: -1})
-    .exec()
+  let allMessages = await db.getAllMessages()
+  // console.log(req.user)
   res.render('index', { user: req.user, messages: allMessages });
 });
 
